@@ -494,6 +494,43 @@ Optimized for:
 
 # API Documentation
 
+## Postman Collection
+
+The project includes a comprehensive Postman collection covering:
+
+- Health checks
+- Profile synchronization
+- Validation testing
+- Analytics endpoints
+- Search functionality
+- Error handling scenarios
+
+### Import Collection
+
+1. Open Postman
+2. Click Import
+3. Select:
+
+```text
+postman/GitHub-Profile-Analyzer.postman_collection.json
+```
+
+### Environment Variables
+
+```json
+{
+  "base_url": "http://localhost:5000"
+}
+```
+
+For deployed environments:
+
+```json
+{
+  "base_url": "https://your-api-domain.com"
+}
+```
+
 ## Health Check
 
 ### Request
