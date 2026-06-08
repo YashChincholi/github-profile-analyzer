@@ -1,4 +1,4 @@
-const db = require("../db/connection");
+import db from "../db/connection.js";
 
 function toMySQLDate(isoString) {
   if (!isoString) return null;
@@ -6,10 +6,10 @@ function toMySQLDate(isoString) {
   return new Date(isoString).toISOString().slice(0, 19).replace("T", " ");
 }
 
-async function saveUser(user) {
+export async function saveUser(user) {
   const sql = `
     INSERT INTO github_users 
-    (id, login, name, company, blog, location, public_repos, followers, following, created_at, updated_at)
+    (github_id, login, name, company, blog, location, public_repos, followers, following, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE
       name = VALUES(name),
@@ -34,5 +34,3 @@ async function saveUser(user) {
 
   await db.execute(sql, values);
 }
-
-module.exports = { saveUser };

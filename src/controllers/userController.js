@@ -1,24 +1,32 @@
-const githubService = require("../services/githubService");
-const userService = require("../services/userService");
+import * as githubService from "../services/githubService.js";
+import * as userService from "../services/userService.js";
 
-async function syncUser(req, res) {
+import { usernameSchema } from "../utils/validateUser.js";
+
+export async function syncUser(req, res) {
   try {
     const { username } = req.params;
 
-    const user = await githubService.fetchGitHubUser(username);
+    const parsed = usernameSchema.safeParse(username);
 
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: "Invalid username",
+        details: parsed.error.errors,
+      });
+    }
+
+    const user = await githubService.fetchGitHubUser(username);
     await userService.saveUser(user);
 
-    res.json({
+    res.status(200).json({
       message: "User synced successfully",
       user,
     });
   } catch (err) {
     res.status(500).json({
-      error: "Failed to sync user",
+      error: "Internal server error",
       details: err.message,
     });
   }
 }
-
-module.exports = { syncUser };

@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
+import express from "express";
+import { syncUser } from "../controllers/userController.js";
 
-const { syncUser } = require("../controllers/userController");
+const router = express.Router();
 
 router.get("/sync/:username", syncUser);
 
-module.exports = router;
+export default router;

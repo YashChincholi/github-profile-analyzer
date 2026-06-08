@@ -1,13 +1,29 @@
-const express = require("express");
-const morgan = require("morgan");
-require("dotenv").config();
+import express from "express";
+import morgan from "morgan";
+import dotenv from "dotenv";
+import userRoutes from "./routes/userRoutes.js";
 
-const userRoutes = require("./routes/userRoutes");
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import { connectWithRetry } from "./db/connectWithRetry.js";
+
+dotenv.config();
 
 const app = express();
 
+app.use(helmet());
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+
+app.use(limiter);
+
+
 app.use(express.json());
 app.use(morgan("dev"));
+await connectWithRetry();
 
 app.use("/api/users", userRoutes);
 
