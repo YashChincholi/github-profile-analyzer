@@ -17,9 +17,19 @@ const envSchema = z.object({
     .transform((val) => Number(val)),
 
   DB_HOST: z.string().min(1, "DB_HOST is required"),
+
+  // Dynamic port handler: parses string to number, defaults to 3306 for local development
+  DB_PORT: z
+    .string()
+    .default("3306")
+    .transform((val) => Number(val)),
+
   DB_USER: z.string().min(1, "DB_USER is required"),
   DB_PASSWORD: z.string().min(1, "DB_PASSWORD is required"),
   DB_NAME: z.string().min(1, "DB_NAME is required"),
+
+  // Optional path string pointing to your ca.pem file
+  DB_SSL_CA: z.string().optional(),
 
   GITHUB_TOKEN: z.string().min(1, "GITHUB_TOKEN is required"),
 });
