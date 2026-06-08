@@ -11,15 +11,39 @@ axiosRetry(client, {
 });
 
 export async function fetchGitHubUser(username) {
-  const response = await client.get(
-    `https://api.github.com/users/${username}`,
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-        "User-Agent": "github-profile-analyzer",
+  try {
+    const response = await client.get(
+      `https://api.github.com/users/${username}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+          "User-Agent": "github-profile-analyzer",
+        },
       },
-    },
-  );
+    );
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    // Retain the original error structure so the controller's catch block can inspect error.response.status
+    throw error;
+  }
+}
+
+// FIX: Added the missing function expected by userController.js
+export async function fetchUserRepos(username) {
+  try {
+    const response = await client.get(
+      `https://api.github.com/users/${username}/repos`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+          "User-Agent": "github-profile-analyzer",
+        },
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 }

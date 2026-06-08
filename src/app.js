@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.js";
+import healthRoutes from "./routes/healthRoutes.js";
 
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -20,12 +21,12 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-
 app.use(express.json());
 app.use(morgan("dev"));
 await connectWithRetry();
 
 app.use("/api/users", userRoutes);
+app.use("/health", healthRoutes);
 
 const PORT = process.env.PORT || 5000;
 
