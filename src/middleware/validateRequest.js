@@ -8,7 +8,7 @@ export default function validateRequest(schema, source = "body") {
       return next(new AppError(result.error.issues[0].message, 400));
     }
 
-    req[source] = result.data;
+    Object.assign(req[source], result.data);
 
     next();
   };

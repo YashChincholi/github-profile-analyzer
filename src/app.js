@@ -50,7 +50,7 @@ app.use("/api/users", userRoutes);
 app.use("/health", healthRoutes);
 
 // 404 handler
-app.all("*", (req, res, next) => {
+app.use((req, res, next) => {
   next(new AppError(`Route ${req.originalUrl} not found`, 404));
 });
 
