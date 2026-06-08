@@ -22,6 +22,18 @@ export async function syncUser(req, res) {
     // Fetch GitHub profile
     const user = await githubService.fetchGitHubUser(username);
 
+    const existingUser = await userService.getStoredUser(username);
+
+    if (
+      existingUser &&
+      new Date(existingUser.updated_at).toISOString() === user.updated_at
+    ) {
+      return res.status(200).json({
+        success: true,
+        status: "UNCHANGED",
+        message: "GitHub profile unchanged",
+      });
+    }
     // Fetch repositories
     const repos = await githubService.fetchUserRepos(username);
 
@@ -30,6 +42,16 @@ export async function syncUser(req, res) {
 
     // Save to database
     await userService.saveUser(user, insights);
+
+    return res.status(200).json({
+      success: true,
+      status: "UPDATED",
+      message: "User synced successfully",
+      data: {
+        profile: user,
+        insights,
+      },
+    });
 
     return res.status(200).json({
       success: true,
@@ -110,5 +132,45 @@ export async function getLocalUser(req, res) {
   res.status(200).json({
     success: true,
     data: user,
+  });
+}
+
+export async function getAnalyticsSummary(req, res) {
+  const analytics = await userService.getAnalyticsSummary();
+
+  res.status(200).json({
+    success: true,
+    data: analytics,
+  });
+}
+
+export async function getTopInfluencers(req, res) {
+  const limit = Number(req.query.limit) || 10;
+
+  const users = await userService.getTopInfluencers(limit);
+
+  res.status(200).json({
+    success: true,
+    count: users.length,
+    data: users,
+  });
+}
+
+export async function searchUsers(req, res) {
+  const { language } = req.query;
+
+  if (!language) {
+    return res.status(400).json({
+      success: false,
+      message: "language query required",
+    });
+  }
+
+  const users = await userService.searchByLanguage(language);
+
+  res.status(200).json({
+    success: true,
+    count: users.length,
+    data: users,
   });
 }

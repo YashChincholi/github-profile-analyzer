@@ -7,6 +7,8 @@ export async function healthCheck(req, res) {
     res.status(200).json({
       success: true,
       uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      node_version: process.version,
       database: "connected",
       timestamp: new Date().toISOString(),
     });
