@@ -527,7 +527,7 @@ For deployed environments:
 
 ```json
 {
-  "base_url": "https://your-api-domain.com"
+    "base_url": "https://github-profile-analyzer-production.up.railway.app"
 }
 ```
 
