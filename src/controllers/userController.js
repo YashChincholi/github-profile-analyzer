@@ -1,113 +1,21 @@
-import * as githubService from "../services/githubService.js";
 import * as userService from "../services/userService.js";
+import * as syncService from "../services/syncService.js";
 
-import { calculateInsights } from "../services/insightService.js";
-import { usernameSchema } from "../utils/validateUser.js";
+import AppError from "../utils/AppError.js";
+import asyncHandler from "../utils/asyncHandler.js";
 
-export async function syncUser(req, res) {
-  try {
-    const { username } = req.params;
+export const syncUser = asyncHandler(async (req, res) => {
+  const { username } = req.params;
 
-    // Validate username
-    const parsed = usernameSchema.safeParse(username);
+  const result = await syncService.syncGitHubUser(username);
 
-    if (!parsed.success) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid GitHub username",
-        errors: parsed.error.issues,
-      });
-    }
+  res.status(200).json({
+    success: true,
+    ...result,
+  });
+});
 
-    // Fetch GitHub profile
-    const user = await githubService.fetchGitHubUser(username);
-
-    const existingUser = await userService.getStoredUser(username);
-
-    if (
-      existingUser &&
-      new Date(existingUser.updated_at).toISOString() === user.updated_at
-    ) {
-      return res.status(200).json({
-        success: true,
-        status: "UNCHANGED",
-        message: "GitHub profile unchanged",
-      });
-    }
-    // Fetch repositories
-    const repos = await githubService.fetchUserRepos(username);
-
-    // Calculate custom insights
-    const insights = calculateInsights(repos);
-
-    // Save to database
-    await userService.saveUser(user, insights);
-
-    return res.status(200).json({
-      success: true,
-      status: "UPDATED",
-      message: "User synced successfully",
-      data: {
-        profile: user,
-        insights,
-      },
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "User synced successfully",
-      data: {
-        profile: {
-          id: user.id,
-          login: user.login,
-          name: user.name,
-          company: user.company,
-          blog: user.blog,
-          location: user.location,
-          public_repos: user.public_repos,
-          followers: user.followers,
-          following: user.following,
-          created_at: user.created_at,
-          updated_at: user.updated_at,
-        },
-        insights,
-      },
-    });
-  } catch (err) {
-    console.error("Sync User Error:", err);
-
-    // GitHub user not found
-    if (err.response?.status === 404) {
-      return res.status(404).json({
-        success: false,
-        message: "GitHub user not found",
-      });
-    }
-
-    // GitHub rate limit
-    if (err.response?.status === 403) {
-      return res.status(429).json({
-        success: false,
-        message: "GitHub API rate limit exceeded",
-      });
-    }
-
-    // GitHub unavailable
-    if (err.response?.status >= 500) {
-      return res.status(502).json({
-        success: false,
-        message: "GitHub service unavailable",
-      });
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-}
-
-export async function getAllUsers(req, res) {
+export const getAllUsers = asyncHandler(async (req, res) => {
   const users = await userService.getAllUsers();
 
   res.status(200).json({
@@ -115,37 +23,35 @@ export async function getAllUsers(req, res) {
     count: users.length,
     data: users,
   });
-}
+});
 
-export async function getLocalUser(req, res) {
+export const getLocalUser = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
   const user = await userService.getLocalUser(username);
 
   if (!user) {
-    return res.status(404).json({
-      success: false,
-      message: "User not found in local database",
-    });
+    throw new AppError("User not found in local database", 404);
   }
 
   res.status(200).json({
     success: true,
     data: user,
   });
-}
+});
 
-export async function getAnalyticsSummary(req, res) {
+export const getAnalyticsSummary = asyncHandler(async (req, res) => {
   const analytics = await userService.getAnalyticsSummary();
 
   res.status(200).json({
     success: true,
     data: analytics,
   });
-}
+});
 
-export async function getTopInfluencers(req, res) {
-  const limit = Number(req.query.limit) || 10;
+export const getTopInfluencers = asyncHandler(async (req, res) => {
+  // Already validated by validateRequest(limitQuerySchema, "query")
+  const { limit } = req.query;
 
   const users = await userService.getTopInfluencers(limit);
 
@@ -154,17 +60,11 @@ export async function getTopInfluencers(req, res) {
     count: users.length,
     data: users,
   });
-}
+});
 
-export async function searchUsers(req, res) {
+export const searchUsers = asyncHandler(async (req, res) => {
+  // Already validated by validateRequest(languageQuerySchema, "query")
   const { language } = req.query;
-
-  if (!language) {
-    return res.status(400).json({
-      success: false,
-      message: "language query required",
-    });
-  }
 
   const users = await userService.searchByLanguage(language);
 
@@ -173,4 +73,4 @@ export async function searchUsers(req, res) {
     count: users.length,
     data: users,
   });
-}
+});

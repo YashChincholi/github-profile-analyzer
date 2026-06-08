@@ -1,7 +1,9 @@
 services:
   db:
     image: mysql:8.0
-    restart: always
+    container_name: github_db
+
+    restart: unless-stopped
 
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -21,11 +23,13 @@ services:
       retries: 10
 
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: dockerfile
 
     container_name: github_api
 
-    restart: always
+    restart: unless-stopped
 
     ports:
       - "5000:5000"
@@ -35,10 +39,14 @@ services:
         condition: service_healthy
 
     environment:
+      NODE_ENV: production
+      PORT: 5000
+
       DB_HOST: db
       DB_USER: root
       DB_PASSWORD: root
       DB_NAME: githubdb
+
       GITHUB_TOKEN: ${GITHUB_TOKEN}
 
 volumes:

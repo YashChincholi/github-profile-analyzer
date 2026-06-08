@@ -19,13 +19,13 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
     "helmet": "^8.2.0",
-    "jest": "^30.4.2",
     "morgan": "^1.11.0",
     "mysql2": "^3.22.5",
-    "supertest": "^7.2.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "supertest": "^7.2.2",
+    "jest": "^30.4.2",
     "nodemon": "^3.1.14"
   }
 }

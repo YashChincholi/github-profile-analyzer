@@ -1,21 +1,15 @@
 import db from "../db/connection.js";
+import asyncHandler from "../utils/asyncHandler.js";
 
-export async function healthCheck(req, res) {
-  try {
-    await db.execute("SELECT 1");
+export const healthCheck = asyncHandler(async (req, res) => {
+  await db.execute("SELECT 1");
 
-    res.status(200).json({
-      success: true,
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      node_version: process.version,
-      database: "connected",
-      timestamp: new Date().toISOString(),
-    });
-  } catch {
-    res.status(503).json({
-      success: false,
-      database: "disconnected",
-    });
-  }
-}
+  res.status(200).json({
+    success: true,
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    node_version: process.version,
+    database: "connected",
+    timestamp: new Date().toISOString(),
+  });
+});

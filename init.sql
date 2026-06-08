@@ -18,7 +18,12 @@ CREATE TABLE github_users (
     synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Separate index commands
+-- Lookup indexes
 CREATE INDEX idx_login ON github_users(login);
 CREATE INDEX idx_language ON github_users(top_language);
+
+-- Ranking queries
 CREATE INDEX idx_stars ON github_users(total_stars);
+
+-- Frequently used sorting
+CREATE INDEX idx_synced_at ON github_users(synced_at);
